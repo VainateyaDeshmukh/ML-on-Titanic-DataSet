@@ -1,0 +1,66 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+df = pd.read_csv("D:\\train.csv")
+df.head()
+df.count()
+df[df['Gender'].str.match("female")].count()
+df[df['Gender'].str.match("male")].count()
+
+sns.countplot(x='Survived', hue='Pclass', data=df)
+sns.countplot(x='Survived', hue='Gender', data=df)
+
+plt.figure(figsize=(10,7))
+sns.boxplot(x='Pclass',y='Age',data=df)
+sns.scatterplot(x='Age',y='Gender',data=df)
+
+df['Age'].fillna(df['Age'].median(),inplace=True)
+df.drop('Cabin',inplace=True,axis=1)
+
+pd.get_dummies(df["Gender"])
+sex = pd.get_dummies(df["Gender"],drop_first=True)
+embarked = pd.get_dummies(df["Embarked"],drop_first=True)
+Pclass = pd.get_dummies(df["Pclass"],drop_first=True)
+
+df = pd.concat([df,Pclass,sex,embarked],axis=1)
+df.drop(["PassengerId","Pclass","Name","Gender","Ticket","Embarked"],axis=1,inplace=True)
+
+X = df.drop("Survived",axis=1)
+y = df["Survived"]
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25, random_state = 10)
+from sklearn.linear_model import LogisticRegression
+log_reg = LogisticRegression()
+log_reg.fit(X_train,y_train)
+y_pred = log_reg.predict(X_test)
+
+#Accuracy of Logistic Regression
+print('Accuracy on training date: {:.3f}'.format(log_reg.score(X_train,y_train)))
+print('Accuracy on training date: {:.3f}'.format(log_reg.score(X_test,y_test)))
+
+#Confussion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test,y_pred)
+cm
+##################################################
+from sklearn.naive_bayes import GaussianNB
+clf = GaussianNB()
+clf.fit(X_train,y_train)
+y_pred = clf.predict(X_test)
+
+print('Accuracy on training date: {:.3f}'.format(clf.score(X_train,y_train)))
+print('Accuracy on training date: {:.3f}'.format(clf.score(X_test,y_test)))
+
+#Confussion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test,y_pred)
+cm
+
+#SVM Model
+from sklearn.svm import SVC
+svm = SVC(kernel= 'linear')
+svm.fit(X_train,y_train)
+y_pred = svm.predict(X_test)
+print('Accuracy on training date: {:.3f}'.format(svm.score(X_train,y_train)))
+print('Accuracy on training date: {:.3f}'.format(svm.score(X_test,y_test)))
